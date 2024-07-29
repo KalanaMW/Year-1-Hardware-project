@@ -11,10 +11,14 @@
 
 #define EEPROM_SIZE 8
 
+//These are calibrated scales by our team
+
 float CRITICAL_ANGLE = 70;
 float CRITICAL_FORCE = 300;
 float CRITICAL_BEND_LOW = 1600;
 float CRITICAL_BEND_HIGH = 1750;
+
+//These are time in seconds for alert 
 
 float ANGLE_TIME = 10;
 float FORCE_TIME = 10;
@@ -30,14 +34,16 @@ bool vibrating = false;
 bool angle_alert = false, bend_alert = false, force_alert = false;
 unsigned int updatedTime;
 
-int mode = 0; // 0 - Normal (Posture Corrector), 1 - SPO2, Heart Rate
+int mode = 0;  // 0 - Normal (Posture Corrector), 1 - SPO2, Heart Rate, this is basically to change the mode to read from MAX 30102 
 
 void giveAlert();
 void pulseOximeterMode();
 
 void setup() {
+
   // put your setup code here, to run once:
   // delay(1000);
+
   Serial.begin(115200);
 
   EEPROM.begin(EEPROM_SIZE);
@@ -70,6 +76,7 @@ void setup() {
   
   // Check mode, and if 1, go to pulseOximeter mode,
   // Once done change the mode again, and restart ESP.
+
   if (mode == 1) {
     Serial.print("In setup mode: ");
     Serial.println(mode);
@@ -122,6 +129,7 @@ void loop() {
   }
   
   // If angle is lower the limit for given time, give alerts.
+
   if ((millis() - angle_time) / 1000 >= ANGLE_TIME) {
     angle_alert = true;
   }
@@ -130,12 +138,14 @@ void loop() {
   }
 
   // Get angle from flex sensor.
+
   float bend = getRawFlexSensor();
   if (bend <= CRITICAL_BEND_HIGH && bend >= CRITICAL_BEND_LOW) {
     bend_time = millis();
   }
 
   // If bent amount is higher than a given amount, give alerts.
+
   if ((millis() - bend_time) / 1000 >= BEND_TIME) {
     bend_alert = true;
   }
@@ -144,12 +154,14 @@ void loop() {
   }
 
   // Get force from force sensor.
+
   float force = getRawForceSensor();
   if (force <= CRITICAL_FORCE) {
     force_time = millis();
   }
 
   // If bent amount is higher than a given amount, give alerts.
+
   if ((millis() - force_time) / 1000 >= FORCE_TIME) {
     force_alert = true;
   }
@@ -172,7 +184,9 @@ void loop() {
   mqttClient.loop();
 
   mqtt_publish("HWP_4312_ROLL", angle);
+
   // mqtt_publish("HWP_4312_TIME", (millis() - angle_time) / 1000);
+  
   mqtt_publish("HWP_4312_BEND", bend);
   mqtt_publish("HWP_4312_FORCE", force);
 } 
