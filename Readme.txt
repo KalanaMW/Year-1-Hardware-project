@@ -1,6 +1,3 @@
-
-Got it! Here’s a more concise version of your README file:
-
 Informative Posture Corrector
 This project aims to develop a device that helps users maintain proper posture by providing real-time feedback.
 
